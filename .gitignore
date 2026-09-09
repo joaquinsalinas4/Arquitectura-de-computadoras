@@ -1,0 +1,17 @@
+*.jou
+*.log
+*.str
+*.backup.*
+*.dcp
+*.xpr
+.Xil/
+*.cache/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+*.srcs/sources_1/ip/
+*.gen/
+webtalk*
+vivado*.jou
+vivado*.log
