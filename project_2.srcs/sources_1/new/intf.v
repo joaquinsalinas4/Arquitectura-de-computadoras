@@ -1,6 +1,26 @@
 `timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 09/14/2026 08:53:31 PM
+// Design Name: 
+// Module Name: interfaz
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
 
-module intf
+
+module interfaz
     # (
         parameter BUS_SIZE = 8
     )
@@ -43,12 +63,14 @@ module intf
         next_state = state;
         next_r_data = r_data;
         tx_start = 0;
+        rx_empty = 1;
         
         case (state)
             wait_for_rx_input: begin
                 if (rx_done) begin
                     next_r_data = d_out;
                     next_state = wait_for_rd;
+                    rx_empty = 0;
                 end
             end
             wait_for_rd: begin
@@ -70,3 +92,4 @@ module intf
     end
     
 endmodule
+
