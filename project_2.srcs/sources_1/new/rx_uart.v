@@ -1,24 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 09/14/2026 07:37:06 PM
-// Design Name: 
-// Module Name: rx_uart
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module rx_uart
 #(
@@ -26,9 +6,10 @@ module rx_uart
     parameter integer bits = 8
 )(
     input wire clock,
+    input wire reset,
     input wire rx,
-    output reg rx_done,
     input wire sample_tick,
+    output reg rx_done,
     output reg [bits-1:0] dout
 );
    localparam [1:0] idle = 2'b00,
