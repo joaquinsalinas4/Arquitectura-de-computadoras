@@ -1,17 +1,17 @@
 `timescale 1ns / 1ps
 
-module tx_alu
+module tx_uart
     # (
     parameter BUS_SIZE = 8
     )
     (
     input wire clock,
+    input wire reset,
+    input wire sample_tick,
     input wire tx_start,
     input wire [BUS_SIZE - 1:0] d_in,
-    input wire reset,
     output reg tx,
-    output reg tx_done,
-    input wire sample_tick
+    output reg tx_done
     );
     
     localparam idle = 2'b00;
