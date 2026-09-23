@@ -62,6 +62,7 @@ module interfaz
             wait_for_rd: begin
                 if (rd) begin
                     next_state_rx = wait_for_rx_input;
+                    next_rx_empty = 1;
                 end
             end
             default: next_state_rx = wait_for_rx_input;
