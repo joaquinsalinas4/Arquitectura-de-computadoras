@@ -6,29 +6,29 @@ module top_alu
         parameter OP_SIZE = 6
     )
     (
-        input wire clock,
-        input wire reset,
-        input wire [BUS_SIZE - 1:0] r_data,
-        input wire rx_empty,
-        input wire tx_full,
-        output wire rd,
-        output reg [BUS_SIZE - 1:0] w_data,
-        output wire wr
+        input  wire                  clock,
+        input  wire                  reset,
+        input  wire [BUS_SIZE - 1:0] r_data,
+        input  wire                  rx_empty,
+        input  wire                  tx_full,
+        output wire                  rd,
+        output wire [BUS_SIZE - 1:0] w_data,
+        output wire                  wr
     );
-    
-    localparam load_a = 2'b00;
-    localparam load_b = 2'b01;
-    localparam load_op = 2'b10;
+
+    localparam load_a      = 2'b00;
+    localparam load_b      = 2'b01;
+    localparam load_op     = 2'b10;
     localparam send_output = 2'b11;
-    
-    reg [1:0] state, next_state;
-    reg [BUS_SIZE - 1:0] reg_a, reg_b, next_a, next_b, next_w_data;
-    reg [OP_SIZE - 1:0] reg_op, next_op;
-    wire [BUS_SIZE-1:0] alu_result;
-    
+
+    reg [1:0]            state, next_state;
+    reg [BUS_SIZE - 1:0] reg_a, reg_b, next_a, next_b;
+    reg [OP_SIZE - 1:0]  reg_op, next_op;
+    wire [BUS_SIZE - 1:0] alu_result;
+
     alu #(
-    .BUS_SIZE(BUS_SIZE),
-    .OP_SIZE(OP_SIZE)
+        .BUS_SIZE(BUS_SIZE),
+        .OP_SIZE(OP_SIZE)
     ) my_alu (
         .a(reg_a),
         .b(reg_b),
@@ -36,61 +36,61 @@ module top_alu
         .leds(alu_result)
     );
 
+    // En send_output, reg_a/reg_b/reg_op ya están cargados:
+    // el resultado de la ALU es válido en ese mismo ciclo
+    assign w_data = alu_result;
+
     assign rd = (state != send_output) && !rx_empty;
     assign wr = (state == send_output) && !tx_full;
-    
+
+    // Secuencial
     always @(posedge clock) begin
         if (reset) begin
-            state <= load_a;
-            reg_a <= 0;
-            reg_b <= 0;
+            state  <= load_a;
+            reg_a  <= 0;
+            reg_b  <= 0;
             reg_op <= 0;
-            w_data <= 0;
         end
         else begin
-            reg_a <= next_a;
-            reg_b <= next_b;
+            state  <= next_state;
+            reg_a  <= next_a;
+            reg_b  <= next_b;
             reg_op <= next_op;
-            state <= next_state;
-            w_data <= next_w_data;
         end
     end
-    
+
+    // Combinacional
     always @(*) begin
         next_state = state;
-        next_a = reg_a;
-        next_b = reg_b;
-        next_op = reg_op;
-        next_w_data = w_data;
-    
+        next_a     = reg_a;
+        next_b     = reg_b;
+        next_op    = reg_op;
+
         case (state)
-        load_a: begin
-            if (rx_empty == 0) begin
-                next_a = r_data;
-                next_state = load_b;
+            load_a: begin
+                if (rx_empty == 0) begin
+                    next_a     = r_data;
+                    next_state = load_b;
+                end
             end
-        end
-        load_b: begin
-            if (rx_empty == 0) begin
-                next_b = r_data;
-                next_state = load_op;
+            load_b: begin
+                if (rx_empty == 0) begin
+                    next_b     = r_data;
+                    next_state = load_op;
+                end
             end
-        end
-        load_op: begin
-            if (rx_empty == 0) begin
-                next_op    = r_data;
-                next_state = send_output;
+            load_op: begin
+                if (rx_empty == 0) begin
+                    next_op    = r_data[OP_SIZE - 1:0];
+                    next_state = send_output;
+                end
             end
-        end
-        
-        send_output: begin
-            if (tx_full == 0) begin
-                next_w_data = alu_result;
-                next_state  = load_a;
-            end 
-        end
-        
-        default: next_state = load_a;
+            send_output: begin
+                if (tx_full == 0)
+                    next_state = load_a;
+            end
+            default: next_state = load_a;
         endcase
     end
+
 endmodule
