@@ -19,7 +19,7 @@ module tx_uart
     localparam data = 2'b10;
     localparam stop = 2'b11;
     
-    reg [2:0] state, next_state;
+    reg [1:0] state, next_state;
     reg [3:0] tick_reg, next_tick;
     reg [2:0] bit_reg, next_bit;
     reg [7:0] shift_reg, next_shift_reg;
