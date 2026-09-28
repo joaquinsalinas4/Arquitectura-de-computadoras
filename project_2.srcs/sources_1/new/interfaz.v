@@ -87,6 +87,7 @@ module interfaz
     
     // Combinacional TX
     always @(*) begin
+        next_state_tx = state_tx;
         next_tx_full = tx_full;
         next_tx_start = 0;
         next_d_in = d_in;
@@ -106,6 +107,7 @@ module interfaz
                     next_state_tx = tx_wait_wr;
                 end
             end
+            default: next_state_tx = tx_wait_wr;
         endcase
     end
     
