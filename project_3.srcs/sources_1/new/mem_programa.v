@@ -38,16 +38,16 @@ module mem_programa
     input wire [BUS_SIZE-1:0]  wr_data
   );
 
-  // 1. El arreglo de 2**ADDR_SIZE posiciones de BUS_SIZE bits
+  
     reg [BUS_SIZE-1:0] mem [0:2**ADDR_SIZE-1];
 
-  // 2. always @(posedge clk): si wr_en, escribir wr_data en wr_addr
+  
      always @(posedge clk) begin
         if(wr_en) begin
           mem[wr_addr] <= wr_data;
         end
      end
-  // 3. assign de la lectura
+ 
   assign instr = mem[addr];
   
 
