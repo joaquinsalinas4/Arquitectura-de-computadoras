@@ -1,28 +1,9 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 10/28/2026 07:11:23 PM
-// Design Name: 
-// Module Name: debug_unit
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module debug_unit 
 # (
-        parameter BUS_SIZE = 32
+        parameter BUS_SIZE = 32,
+        parameter ADDRESS_SIZE = 8
     )
     (
         input wire clock,
@@ -44,17 +25,27 @@ module debug_unit
     reg [BUS_SIZE - 1:0] next_r_data, next_d_in;
     reg next_rx_empty, next_tx_full, next_tx_start;
     
+    // Codigos del programa
+    localparam start_cmd = 8'b00010001;
+    localparam halt_cmd = 8'b00010000;
+    localparam write_mem_cmd = 8'b00011111;
+    localparam step_cmd = 8'b11010001;
     // Estados RX
+    localparam wait_for_command = 1'b0;
     localparam wait_for_rx_input = 1'b0;
     localparam wait_for_rd = 1'b1;
     // Estados TX
     localparam tx_wait_wr = 1'b0;
     localparam tx_wait_tx_done = 1'b1;
+
+    // Nuevos registros
+    reg [ADDRESS_SIZE - 1:0] pos_mem, next_pos_mem;
+
     
     // Secuencial RX (RX -> ALU)
     always @(posedge clock) begin
         if (reset) begin
-            state_rx <= wait_for_rx_input;
+            state_rx <= wait_for_command;
             r_data <= 0;
             rx_empty <= 1;
         end
@@ -72,6 +63,15 @@ module debug_unit
         next_rx_empty = rx_empty;
         
         case (state_rx)
+            wait_for_command: begin
+                if (rx_done) begin
+                    next_r_data = d_out;
+                    case (d_out)
+
+                    endcase
+                end
+            end
+            /*
             wait_for_rx_input: begin
                 if (rx_done) begin
                     next_r_data = d_out;
@@ -86,6 +86,7 @@ module debug_unit
                 end
             end
             default: next_state_rx = wait_for_rx_input;
+            */
         endcase
     end
     
