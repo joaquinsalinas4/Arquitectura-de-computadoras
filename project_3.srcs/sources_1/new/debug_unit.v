@@ -18,7 +18,12 @@ module debug_unit
         output reg rx_empty,
         output reg [BUS_SIZE - 1:0] d_in,
         output reg tx_start,
-        output reg tx_full
+        output reg tx_full,
+
+        // Nuevas salidas (para memoria de datos)
+        output reg [BUS_SIZE - 1:0] wr_data,
+        output reg wr_en,
+        output reg [ADDRESS_SIZE - 1:0] wr_address;
     );
     
     reg state_rx, next_state_rx, state_tx, next_state_tx;
@@ -30,8 +35,18 @@ module debug_unit
     localparam halt_cmd = 8'b00010000;
     localparam write_mem_cmd = 8'b00011111;
     localparam step_cmd = 8'b11010001;
+    
     // Estados RX
-    localparam wait_for_command = 1'b0;
+    localparam wait_for_command = 4'b0000;
+    localparam start_rx = 4'b0001;
+    localparam rx_halt = 4'b0010;
+    localparam rx_write_mem = 4'b0011;
+    localparam rx_step = 4'b0100;
+
+    // Estados write_mem
+    localparam
+
+    // TP PASADO (capaz los borramos)
     localparam wait_for_rx_input = 1'b0;
     localparam wait_for_rd = 1'b1;
     // Estados TX
@@ -56,37 +71,37 @@ module debug_unit
         end
     end
     
-    // Combinacional RX
+    // Combinacional RX - Comandos Debug Unit
     always @(*) begin
-        next_state_rx = state_rx;
-        next_r_data = r_data;
-        next_rx_empty = rx_empty;
-        
         case (state_rx)
             wait_for_command: begin
                 if (rx_done) begin
-                    next_r_data = d_out;
                     case (d_out)
-
+                        start_cmd: begin
+                            next_state_rx = start_rx;
+                        end
+                        halt_cmd: begin
+                            next_state_rx = rx_halt;
+                        end
+                        write_mem_cmd: begin
+                            next_state_rx = rx_write_mem;
+                        end
+                        step_cmd: begin
+                            next_state_rx = rx_step;
+                        end
                     endcase
+                    // next_rx_empty = 0;
                 end
             end
-            /*
-            wait_for_rx_input: begin
+            rx_write_mem: begin
                 if (rx_done) begin
-                    next_r_data = d_out;
-                    next_state_rx = wait_for_rd;
-                    next_rx_empty = 0;
+                    wr_data = d_out;
+                    next_pos_mem = next_pos_mem + 8;
+                    wr_addr = pos_mem;
+                    wr_en = 1;
                 end
             end
-            wait_for_rd: begin
-                if (rd) begin
-                    next_state_rx = wait_for_rx_input;
-                    next_rx_empty = 1;
-                end
-            end
-            default: next_state_rx = wait_for_rx_input;
-            */
+            default: next_state_rx = wait_for_command;
         endcase
     end
     
