@@ -6,7 +6,7 @@ module mem_programa
     parameter ADDR_SIZE = 8
   )
   (
-    input wire clk,
+    input wire clock,
 
     // Lectura (procesador, etapa IF)
     input wire [ADDR_SIZE-1:0] addr,
