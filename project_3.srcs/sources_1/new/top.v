@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`default_nettype none
 
 module top
 #(
@@ -12,13 +13,14 @@ module top
   )
   (
     input wire clock,
+    input wire rx,
     input wire reset,
     output wire tx
   );
 
-  wire tick, rx, rx_done, tx_start, tx_done, cpu_enable, wr_en;
+  wire tick, rx_done, tx_start, tx_done, cpu_enable, wr_en;
   wire [ADDRESS_SIZE-1:0] tx_data, rx_data, wr_addr;
-  wire [BUS_SIZE-1:0] pc, next_pc, wr_data, instr;
+  wire [BUS_SIZE-1:0] pc, next_pc, wr_data, instr, pc_latch, inst_latch;
 
   assign next_pc = pc + 1;
 
@@ -85,7 +87,7 @@ module top
   mem_programa_1
   (
     .clock(clock),
-    .addr(),
+    .addr(pc[ADDRESS_SIZE-1:0]),
     .instr(instr),
     .wr_en(wr_en),
     .wr_addr(wr_addr),
@@ -100,13 +102,13 @@ module top
   (
     .clock(clock),
     .reset(reset),
-    .enable(),
+    .enable(cpu_enable),
     .dr(instr),
     .pc_in(pc),
-    .pc4_in(),
+    .pc4_in(next_pc),
     .pc4_out(),
-    .pc_out(),
-    .inst_out()
+    .pc_out(pc_latch),
+    .inst_out(inst_latch)
   );
 
   debug_unit
@@ -128,8 +130,8 @@ module top
     .mem_wr_addr(wr_addr),
     .mem_wr_data(wr_data),
     .cpu_enable(cpu_enable),
-    .pc(),
-    .if_id_instr()
+    .pc(pc_latch),
+    .if_id_instr(inst_latch)
   );
 
 endmodule

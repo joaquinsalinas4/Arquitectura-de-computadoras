@@ -22,7 +22,7 @@ module mem_programa
     reg [BUS_SIZE-1:0] mem [0:2**ADDR_SIZE-1];
 
   
-     always @(posedge clk) begin
+     always @(posedge clock) begin
         if(wr_en) begin
           mem[wr_addr] <= wr_data;
         end
