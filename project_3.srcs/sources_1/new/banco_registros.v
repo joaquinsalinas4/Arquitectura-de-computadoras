@@ -1,24 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 10/26/2026 01:53:11 AM
-// Design Name: 
-// Module Name: banco_registros
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module banco_registros
     #(
@@ -27,7 +7,7 @@ module banco_registros
 
     )
     (
-        input wire clk, 
+        input wire clock, 
         input wire reset,
         input wire enable,
         
@@ -45,16 +25,13 @@ module banco_registros
         //Debug Unit
         input wire [ADDR_SIZE-1:0] dbg_addr,
         output wire [BUS_SIZE-1:0] dbg_data
-        
-        
-        
        );
        
        reg [BUS_SIZE-1:0] regs [0:31];
        
        integer i;
        
-       always @(negedge clk) begin
+       always @(negedge clock) begin
             if(reset) begin
                 for(i=0; i < 32; i = i+1) 
                     regs[i] <= 0;
