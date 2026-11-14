@@ -3,8 +3,7 @@
 module banco_registros
     #(
         parameter BUS_SIZE = 32,
-        parameter ADDR_SIZE  = 5
-
+        parameter ADDR_SIZE = 5
     )
     (
         input wire clock, 
