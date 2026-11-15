@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module banco_registros
+module reg_bank
     #(
         parameter BUS_SIZE = 32,
         parameter ADDR_SIZE = 5

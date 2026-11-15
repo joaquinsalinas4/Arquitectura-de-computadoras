@@ -134,4 +134,85 @@ module top
     .if_id_instr(inst_latch)
   );
 
+  // Etapa ID
+  wire flush;
+  wire [4:0] rs1    = inst_latch[19:15];
+  wire [4:0] rs2    = inst_latch[24:20];
+  wire [4:0] rd     = inst_latch[11:7];
+  wire [2:0] funct3 = inst_latch[14:12];
+  wire [6:0] funct7 = inst_latch[31:25];
+
+  reg_bank
+  (
+    .BUS_SIZE(BUS_SIZE),
+    .ADDR_SIZE(ADDR_SIZE)
+  )
+  reg_bank_1
+  (
+    .clock(clock), 
+    .reset(reset),
+    .enable(cpu_enable),
+    .rs1_addr(rs1),
+    .rs2_addr(rs2),
+    .rs1_data(),
+    .rs2_data(),
+    .reg_write(),
+    .rd_addr(rd),
+    .wr_data(),
+    .dbg_addr(),
+    .dbg_data()
+  );
+
+  latch_id_ex
+  (
+    .clock(clock),
+    .reset(reset),
+    .enable(cpu_enable),
+    .flush(flush),
+    .pc_in(),
+    .pc4_in(),
+    .rs1_data_in(),
+    .rs2_data_in(),
+    .imm_in(),
+    .rs1_in(rs1),
+    .rs2_in(rs2),
+    .rd_in(rd),
+    .funct3_in(funct3),
+    .funct7_in(funct7),
+    .inst_in(),
+    .alu_src_in(),
+    .alu_op_in(),
+    .branch_in(),
+    .jump_in(),
+    .mem_read_in(),
+    .mem_write_in(),
+    .reg_write_in(),
+    .mem_to_reg_in(),
+    .pc_out(),
+    .pc4_out(),
+    .rs1_data_out(),
+    .rs2_data_out(),
+    .imm_out(),
+    .rs1_out(),
+    .rs2_out(),
+    .rd_out(),
+    .funct3_out(),
+    .funct7_out(),
+    .inst_out(),
+    .alu_src_out(),
+    .alu_op_out(),
+    .branch_out(),
+    .jump_out(),
+    .mem_read_out(),
+    .mem_write_out(),
+    .reg_write_out(),
+    .mem_to_reg_out()
+  )
+  latch_id_ex_1
+  (
+    .BUS_SIZE(BUS_SIZE),
+    .REG_SIZE(5),
+    .ALU_OP_SIZE(4)
+  );
+
 endmodule
