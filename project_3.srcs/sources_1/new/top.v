@@ -19,10 +19,11 @@ module top
   );
 
   wire tick, rx_done, tx_start, tx_done, cpu_enable, wr_en;
-  wire [ADDRESS_SIZE-1:0] tx_data, rx_data, wr_addr;
+  wire [BYTE_SIZE-1:0] tx_data, rx_data;
+  wire [ADDRESS_SIZE-1:0] wr_addr;
   wire [BUS_SIZE-1:0] pc, next_pc, wr_data, instr, pc_latch, inst_latch;
 
-  assign next_pc = pc + 1;
+  assign next_pc = pc + 4;
 
   baud_rate
   #(
@@ -87,7 +88,7 @@ module top
   mem_programa_1
   (
     .clock(clock),
-    .addr(pc[ADDRESS_SIZE-1:0]),
+    .addr(pc[ADDRESS_SIZE+1:2]),
     .instr(instr),
     .wr_en(wr_en),
     .wr_addr(wr_addr),
