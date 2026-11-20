@@ -42,7 +42,6 @@ module debug_unit
   // Comandos
   localparam CMD_LOAD = 8'h4C;   // 'L'
   localparam CMD_STEP = 8'h53;   // 'S'
-
   localparam HALT = 32'hFFFFFFFF;
 
   // Registros

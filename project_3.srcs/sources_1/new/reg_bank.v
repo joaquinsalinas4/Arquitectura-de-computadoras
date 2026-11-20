@@ -13,8 +13,8 @@ module reg_bank
         //Lectura
         input wire [ADDR_SIZE-1:0] rs1_addr,
         input wire [ADDR_SIZE-1:0] rs2_addr,
-        output wire [BUS_SIZE-1:0]    rs1_data,
-        output wire [BUS_SIZE-1:0]    rs2_data,
+        output wire [BUS_SIZE-1:0] rs1_data,
+        output wire [BUS_SIZE-1:0] rs2_data,
         
         //Escritura
         input wire reg_write,

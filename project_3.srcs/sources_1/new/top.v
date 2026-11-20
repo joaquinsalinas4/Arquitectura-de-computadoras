@@ -144,6 +144,11 @@ module top
   wire [2:0] funct3 = inst_id[14:12];
   wire [6:0] funct7 = inst_id[31:25];
 
+  // para Control Unit -> Latch ID EX
+  wire alu_src_id, memRead_id, memWrite_id, branch_id, jump_id, regWrite_id;
+  wire [2:0] alu_op_id;
+  wire [1:0] wb_sel_id;
+
   reg_bank
   (
     .BUS_SIZE(BUS_SIZE),
@@ -188,14 +193,14 @@ module top
     .funct3_in(funct3),
     .funct7_in(funct7),
     .inst_in(inst_id),
-    .alu_src_in(),
-    .alu_op_in(),
-    .branch_in(),
-    .jump_in(),
-    .mem_read_in(),
-    .mem_write_in(),
-    .reg_write_in(),
-    .mem_to_reg_in(),
+    .alu_src_in(alu_src_id),
+    .alu_op_in(alu_op_id),
+    .branch_in(branch_id),
+    .jump_in(jump_id),
+    .mem_read_in(memRead_id),
+    .mem_write_in(memWrite_id),
+    .reg_write_in(regWrite_id),
+    .mem_to_reg_in(wb_sel_id),
     .pc_out(),
     .pc4_out(),
     .rs1_data_out(),
@@ -224,14 +229,14 @@ module top
   control_unit_1
   (
     .opcode(inst_latch[6:0]),
-    .ALUsrc(),
-    .ALUop(),
-    .memRead(),
-    .memWrite(),
-    .branch(),
-    .jump(),
-    .wb_sel(),
-    .regWrite()
+    .ALUsrc(alu_src_id),
+    .ALUop(alu_op_id),
+    .memRead(memRead_id),
+    .memWrite(memWrite_id),
+    .branch(branch_id),
+    .jump(jump_id),
+    .wb_sel(wb_sel_id),
+    .regWrite(regWrite_id)
   );
   
   imm_gen
