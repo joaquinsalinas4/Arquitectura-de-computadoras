@@ -4,20 +4,21 @@ module debug_unit
   #(
     parameter BUS_SIZE     = 32,
     parameter ADDRESS_SIZE = 8,
-    parameter BYTE_SIZE    = 8
+    parameter BYTE_SIZE    = 8,
+    parameter REG_ADDR_SIZE = 5
   )
   (
-    input  wire clock,
-    input  wire reset,
+    input wire clock,
+    input wire reset,
 
     // UART RX
-    input  wire rx_done,
-    input  wire [BYTE_SIZE-1:0]    rx_data,
+    input wire rx_done,
+    input wire [BYTE_SIZE-1:0]    rx_data,
 
     // UART TX
     output wire tx_start,
     output reg  [BYTE_SIZE-1:0]    tx_data,
-    input  wire tx_done,
+    input wire tx_done,
 
     // Memoria de programa
     output wire mem_wr_en,
@@ -26,8 +27,12 @@ module debug_unit
 
     // Procesador
     output wire cpu_enable,
-    input  wire [BUS_SIZE-1:0] pc,
-    input  wire [BUS_SIZE-1:0] if_id_instr
+    input wire [BUS_SIZE-1:0] pc,
+    input wire [BUS_SIZE-1:0] if_id_instr,
+
+    // Registros
+    output wire [REG_ADDR_SIZE-1:0] reg_dbg_addr,
+    input wire [BUS_SIZE-1:0] reg_dbg_data
   );
 
   // Estados

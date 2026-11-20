@@ -10,7 +10,8 @@ module top
     parameter bits = 8,
     parameter ciclos = 325,
     parameter N = 9,
-    parameter OPCODE_SIZE = 7
+    parameter OPCODE_SIZE = 7,
+    parameter REG_ADDR_SIZE = 5
   )
   (
     input wire clock,
@@ -22,6 +23,11 @@ module top
   wire tick, rx_done, tx_start, tx_done, cpu_enable, wr_en;
   wire [ADDRESS_SIZE-1:0] tx_data, rx_data, wr_addr;
   wire [BUS_SIZE-1:0] pc, next_pc, wr_data, instr, pc_out_latch_if, pc4_out_latch_if;
+
+  // Conexión entre debug unit y banco de registros
+  wire[REG_ADDR_SIZE-1:0] reg_dbg_addr;
+  wire[BUS_SIZE-1:0] reg_dbg_data;
+
 
   assign next_pc = pc + 1;
 
@@ -116,7 +122,8 @@ module top
   #(
     .BUS_SIZE(BUS_SIZE),
     .ADDRESS_SIZE(ADDRESS_SIZE),
-    .BYTE_SIZE(BYTE_SIZE)
+    .BYTE_SIZE(BYTE_SIZE),
+    .REG_ADDR_SIZE(REG_ADDR_SIZE)
   )
   debug_unit_1
   (
@@ -132,7 +139,9 @@ module top
     .mem_wr_data(wr_data),
     .cpu_enable(cpu_enable),
     .pc(pc_out_latch_if),
-    .if_id_instr(inst_id)
+    .if_id_instr(inst_id),
+    .reg_dbg_addr(reg_dbg_addr),
+    .reg_dbg_data(reg_dbg_data)
   );
 
   // Etapa ID
@@ -166,8 +175,8 @@ module top
     .reg_write(),
     .rd_addr(rd),
     .wr_data(),
-    .dbg_addr(),
-    .dbg_data()
+    .dbg_addr(reg_dbg_addr),
+    .dbg_data(reg_dbg_data)
   );
 
   latch_id_ex
