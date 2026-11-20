@@ -9,7 +9,8 @@ module top
     parameter ticks = 16,
     parameter bits = 8,
     parameter ciclos = 325,
-    parameter N = 9
+    parameter N = 9,
+    parameter OPCODE_SIZE = 7
   )
   (
     input wire clock,
@@ -20,7 +21,7 @@ module top
 
   wire tick, rx_done, tx_start, tx_done, cpu_enable, wr_en;
   wire [ADDRESS_SIZE-1:0] tx_data, rx_data, wr_addr;
-  wire [BUS_SIZE-1:0] pc, next_pc, wr_data, instr, pc_latch, inst_latch;
+  wire [BUS_SIZE-1:0] pc, next_pc, wr_data, instr, pc_out_latch_if, pc4_out_latch_if;
 
   assign next_pc = pc + 1;
 
@@ -106,9 +107,9 @@ module top
     .dr(instr),
     .pc_in(pc),
     .pc4_in(next_pc),
-    .pc4_out(),
-    .pc_out(pc_latch),
-    .inst_out(inst_latch)
+    .pc4_out(pc4_out_latch_if),
+    .pc_out(pc_out_latch_if),
+    .inst_out(inst_id)
   );
 
   debug_unit
@@ -130,22 +131,23 @@ module top
     .mem_wr_addr(wr_addr),
     .mem_wr_data(wr_data),
     .cpu_enable(cpu_enable),
-    .pc(pc_latch),
-    .if_id_instr(inst_latch)
+    .pc(pc_out_latch_if),
+    .if_id_instr(inst_id)
   );
 
   // Etapa ID
+  wire [BUS_SIZE-1:0] inst_id, rs1_data_id, rs2_data_id, imm_id;
   wire flush;
-  wire [4:0] rs1    = inst_latch[19:15];
-  wire [4:0] rs2    = inst_latch[24:20];
-  wire [4:0] rd     = inst_latch[11:7];
-  wire [2:0] funct3 = inst_latch[14:12];
-  wire [6:0] funct7 = inst_latch[31:25];
+  wire [4:0] rs1    = inst_id[19:15];
+  wire [4:0] rs2    = inst_id[24:20];
+  wire [4:0] rd     = inst_id[11:7];
+  wire [2:0] funct3 = inst_id[14:12];
+  wire [6:0] funct7 = inst_id[31:25];
 
   reg_bank
   (
     .BUS_SIZE(BUS_SIZE),
-    .ADDR_SIZE(ADDR_SIZE)
+    .ADDR_SIZE(ADDRESS_SIZE)
   )
   reg_bank_1
   (
@@ -154,8 +156,8 @@ module top
     .enable(cpu_enable),
     .rs1_addr(rs1),
     .rs2_addr(rs2),
-    .rs1_data(),
-    .rs2_data(),
+    .rs1_data(rs1_data_id),
+    .rs2_data(rs2_data_id),
     .reg_write(),
     .rd_addr(rd),
     .wr_data(),
@@ -165,21 +167,27 @@ module top
 
   latch_id_ex
   (
+    .BUS_SIZE(BUS_SIZE),
+    .REG_SIZE(5),
+    .ALU_OP_SIZE(4)
+  )
+  latch_id_ex_1
+  (
     .clock(clock),
     .reset(reset),
     .enable(cpu_enable),
     .flush(flush),
-    .pc_in(),
-    .pc4_in(),
-    .rs1_data_in(),
-    .rs2_data_in(),
-    .imm_in(),
+    .pc_in(pc_out_latch_if),
+    .pc4_in(pc4_out_latch_if),
+    .rs1_data_in(rs1_data_id),
+    .rs2_data_in(rs2_data_id),
+    .imm_in(imm_id),
     .rs1_in(rs1),
     .rs2_in(rs2),
     .rd_in(rd),
     .funct3_in(funct3),
     .funct7_in(funct7),
-    .inst_in(),
+    .inst_in(inst_id),
     .alu_src_in(),
     .alu_op_in(),
     .branch_in(),
@@ -207,12 +215,34 @@ module top
     .mem_write_out(),
     .reg_write_out(),
     .mem_to_reg_out()
+  );
+    
+  control_unit
+  (
+    .OPCODE_SIZE(OPCODE_SIZE)
   )
-  latch_id_ex_1
+  control_unit_1
+  (
+    .opcode(inst_latch[6:0]),
+    .ALUsrc(),
+    .ALUop(),
+    .memRead(),
+    .memWrite(),
+    .branch(),
+    .jump(),
+    .wb_sel(),
+    .regWrite()
+  );
+  
+  imm_gen
   (
     .BUS_SIZE(BUS_SIZE),
-    .REG_SIZE(5),
-    .ALU_OP_SIZE(4)
-  );
+    .OPCODE_SIZE(OPCODE_SIZE)
+  )
+  imm_gen_1
+  (
+    .instr(inst_id),
+    .inmediato(imm_id)
+  ); 
 
 endmodule
