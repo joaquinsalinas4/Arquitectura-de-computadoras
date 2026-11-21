@@ -24,6 +24,20 @@ module top
   wire [ADDRESS_SIZE-1:0] tx_data, rx_data, wr_addr;
   wire [BUS_SIZE-1:0] pc, next_pc, wr_data, instr, pc_out_latch_if, pc4_out_latch_if;
 
+  // Etapa ID
+  wire [BUS_SIZE-1:0] inst_id, rs1_data_id, rs2_data_id, imm_id;
+  wire flush = 1'b0;
+  wire [4:0] rs1    = inst_id[19:15];
+  wire [4:0] rs2    = inst_id[24:20];
+  wire [4:0] rd     = inst_id[11:7];
+  wire [2:0] funct3 = inst_id[14:12];
+  wire [6:0] funct7 = inst_id[31:25];
+
+  // para Control Unit -> Latch ID EX
+  wire alu_src_id, memRead_id, memWrite_id, branch_id, jump_id, regWrite_id;
+  wire [2:0] alu_op_id;
+  wire [1:0] wb_sel_id;
+
   // Conexión entre debug unit y banco de registros
   wire[REG_ADDR_SIZE-1:0] reg_dbg_addr;
   wire[BUS_SIZE-1:0] reg_dbg_data;
@@ -145,23 +159,10 @@ module top
   );
 
   // Etapa ID
-  wire [BUS_SIZE-1:0] inst_id, rs1_data_id, rs2_data_id, imm_id;
-  wire flush;
-  wire [4:0] rs1    = inst_id[19:15];
-  wire [4:0] rs2    = inst_id[24:20];
-  wire [4:0] rd     = inst_id[11:7];
-  wire [2:0] funct3 = inst_id[14:12];
-  wire [6:0] funct7 = inst_id[31:25];
-
-  // para Control Unit -> Latch ID EX
-  wire alu_src_id, memRead_id, memWrite_id, branch_id, jump_id, regWrite_id;
-  wire [2:0] alu_op_id;
-  wire [1:0] wb_sel_id;
-
   reg_bank
-  (
+  #(
     .BUS_SIZE(BUS_SIZE),
-    .ADDR_SIZE(ADDRESS_SIZE)
+    .ADDR_SIZE(REG_ADDR_SIZE)
   )
   reg_bank_1
   (
@@ -172,15 +173,15 @@ module top
     .rs2_addr(rs2),
     .rs1_data(rs1_data_id),
     .rs2_data(rs2_data_id),
-    .reg_write(),
+    .reg_write(1'b0), // cambiar esto en etapa WB
     .rd_addr(rd),
-    .wr_data(),
+    .wr_data(32'd0), // cambiar esto en etapa WB
     .dbg_addr(reg_dbg_addr),
     .dbg_data(reg_dbg_data)
   );
 
   latch_id_ex
-  (
+  #(
     .BUS_SIZE(BUS_SIZE),
     .REG_SIZE(5),
     .ALU_OP_SIZE(4)
@@ -232,12 +233,12 @@ module top
   );
     
   control_unit
-  (
+  #(
     .OPCODE_SIZE(OPCODE_SIZE)
   )
   control_unit_1
   (
-    .opcode(inst_latch[6:0]),
+    .opcode(inst_id[6:0]),
     .ALUsrc(alu_src_id),
     .ALUop(alu_op_id),
     .memRead(memRead_id),
@@ -249,7 +250,7 @@ module top
   );
   
   imm_gen
-  (
+  #(
     .BUS_SIZE(BUS_SIZE),
     .OPCODE_SIZE(OPCODE_SIZE)
   )
