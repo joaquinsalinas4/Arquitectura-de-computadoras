@@ -21,7 +21,8 @@ module top
   );
 
   wire tick, rx_done, tx_start, tx_done, cpu_enable, wr_en;
-  wire [ADDRESS_SIZE-1:0] tx_data, rx_data, wr_addr;
+  wire [BYTE_SIZE -1:0] tx_data, rx_data;
+  wire [ADDRESS_SIZE - 1: 0] wr_addr;
   wire [BUS_SIZE-1:0] pc, next_pc, wr_data, instr, pc_out_latch_if, pc4_out_latch_if;
 
   // Etapa ID
@@ -41,9 +42,27 @@ module top
   // Conexión entre debug unit y banco de registros
   wire[REG_ADDR_SIZE-1:0] reg_dbg_addr;
   wire[BUS_SIZE-1:0] reg_dbg_data;
+  
+  
+    // Latch ID/EX -> etapa EX
+  wire [BUS_SIZE-1:0]      pc_ex, pc4_ex, rs1_data_ex, rs2_data_ex, inst_ex, imm_ex;
+  wire [REG_ADDR_SIZE-1:0] rs1_ex, rs2_ex, rd_ex;
+  wire [2:0]               funct3_ex;
+  wire [6:0]               funct7_ex;
+  wire                     alu_src_ex, branch_ex, jump_ex;
+  wire                     memRead_ex, memWrite_ex, regWrite_ex;
+  wire [2:0]               alu_op_ex;
+  wire [1:0]               wb_sel_ex;
+  
+
+  // Etapa EX
+  reg [BUS_SIZE-1:0] alu_b_ex;
+  wire [3:0]          alu_ctrl_ex;
+  wire [BUS_SIZE-1:0] alu_result_ex;
+  wire                zero_ex;
 
 
-  assign next_pc = pc + 1;
+  assign next_pc = pc + 4;
 
   baud_rate
   #(
@@ -108,7 +127,7 @@ module top
   mem_programa_1
   (
     .clock(clock),
-    .addr(pc[ADDRESS_SIZE-1:0]),
+    .addr(pc[ADDRESS_SIZE+1:2]),
     .instr(instr),
     .wr_en(wr_en),
     .wr_addr(wr_addr),
@@ -183,8 +202,8 @@ module top
   latch_id_ex
   #(
     .BUS_SIZE(BUS_SIZE),
-    .REG_SIZE(5),
-    .ALU_OP_SIZE(4)
+    .REG_SIZE(REG_ADDR_SIZE),
+    .ALU_OP_SIZE(3)
   )
   latch_id_ex_1
   (
@@ -211,25 +230,25 @@ module top
     .mem_write_in(memWrite_id),
     .reg_write_in(regWrite_id),
     .mem_to_reg_in(wb_sel_id),
-    .pc_out(),
-    .pc4_out(),
-    .rs1_data_out(),
-    .rs2_data_out(),
-    .imm_out(),
-    .rs1_out(),
-    .rs2_out(),
-    .rd_out(),
-    .funct3_out(),
-    .funct7_out(),
-    .inst_out(),
-    .alu_src_out(),
-    .alu_op_out(),
-    .branch_out(),
-    .jump_out(),
-    .mem_read_out(),
-    .mem_write_out(),
-    .reg_write_out(),
-    .mem_to_reg_out()
+    .pc_out(pc_ex),
+    .pc4_out(pc4_ex),
+    .rs1_data_out(rs1_data_ex),
+    .rs2_data_out(rs2_data_ex),
+    .imm_out(imm_ex),
+    .rs1_out(rs1_ex),
+    .rs2_out(rs2_ex),
+    .rd_out(rd_ex),
+    .funct3_out(funct3_ex),
+    .funct7_out(funct7_ex),
+    .inst_out(inst_ex),
+    .alu_src_out(alu_src_ex),
+    .alu_op_out(alu_op_ex),
+    .branch_out(branch_ex),
+    .jump_out(jump_ex),
+    .mem_read_out(memRead_ex),
+    .mem_write_out(memWrite_ex),
+    .reg_write_out(regWrite_ex),
+    .mem_to_reg_out(wb_sel_ex)
   );
     
   control_unit
@@ -259,5 +278,41 @@ module top
     .instr(inst_id),
     .inmediato(imm_id)
   ); 
+  
+    // Etapa EX  
+  always @(*) begin
+    if(alu_src_ex) 
+        alu_b_ex = imm_ex;
+    else 
+        alu_b_ex = rs2_data_ex;
+    
+  end
+  
+  control_alu
+  #(
+    .ALU_SIZE(3),
+    .ALUCTRL_SIZE(4)
+  )
+  control_alu_1
+  (
+    .alu_op(alu_op_ex),
+    .funct3(funct3_ex),
+    .bit30(funct7_ex[5]),
+    .alu_ctrl(alu_ctrl_ex)
+  );
+
+  alu
+  #(
+    .BUS_SIZE(BUS_SIZE),
+    .OP_SIZE(4)
+  )
+  alu_1
+  (
+    .a(rs1_data_ex),
+    .b(alu_b_ex),
+    .op(alu_ctrl_ex),
+    .result(alu_result_ex),
+    .zero(zero_ex)
+  );
 
 endmodule
