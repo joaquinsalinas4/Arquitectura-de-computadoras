@@ -1,9 +1,9 @@
 module imm_gen
-#(
+    #(
     parameter BUS_SIZE = 32,
     parameter OPCODE_SIZE = 7
     )
-(
+    (
     input wire [BUS_SIZE-1:0] instr,
     output reg [BUS_SIZE-1:0] inmediato
 

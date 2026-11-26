@@ -1,32 +1,10 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 23.11.2026 20:42:10
-// Design Name: 
-// Module Name: latch_ex_mem
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module latch_ex_mem
     #(
         parameter BUS_SIZE = 32,
         parameter REG_SIZE = 5
     )
-
-
     (
         //Entradas
         input wire clock,

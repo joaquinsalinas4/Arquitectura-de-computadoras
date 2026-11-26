@@ -2,7 +2,7 @@
 `default_nettype none
 
 module top
-#(
+  #(
     parameter BUS_SIZE     = 32,
     parameter ADDRESS_SIZE = 8,
     parameter BYTE_SIZE    = 8,
