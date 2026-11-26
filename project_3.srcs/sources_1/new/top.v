@@ -315,4 +315,37 @@ module top
     .zero(zero_ex)
   );
 
+  latch_ex_mem
+    #(
+        .BUS_SIZE(BUS_SIZE),
+        .REG_SIZE(REG_ADDR_SIZE)
+    )
+  latch_ex_mem
+    (
+
+        .clock(clock),
+        .reset(reset),
+        .enable(cpu_enable),
+        .memRead_in(memRead_ex),
+        .memWrite_in(memWrite_ex),
+        .regWrite_in(regWrite_ex),
+        .alu_result_in(alu_result_ex),
+        .rs2_data_in(rs2_data_ex),
+        .rd_in(rd_ex),
+        .pc4_in(pc4_ex),
+        .wb_sel_in(wb_sel_ex),
+        .funct3_in(funct3_ex),
+        .inst_in(inst_ex),  
+        .rs2_data_out(),
+        .alu_result_out(),
+        .memRead_out(),
+        .memWrite_out(),
+        .regWrite_out(),
+        .rd_out(),
+        .pc4_out(),
+        .wb_sel_out(),
+        .funct3_out(),
+        .inst_out()
+    );
+
 endmodule
